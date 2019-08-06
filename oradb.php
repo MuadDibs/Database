@@ -96,7 +96,9 @@ class oradb extends AbstractDatabase
   
   public static function getOne(String $sql, array $params = [])
     {
-    // TODO: Implement getOne() method.
+    $data = [];
+    $statement = self::execute($sql, $params);
+    return $statement->fetchAssoc();
     }
   
   public static function getCursor()
