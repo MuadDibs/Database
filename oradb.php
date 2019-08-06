@@ -76,6 +76,12 @@ class oradb extends AbstractDatabase
     return $statement;
     }
   
+  /**
+   * @param String $sql
+   * @param array  $params
+   * @return Oci8Statement
+   * @throws \modules\Oci8\Oci8Exception
+   */
   public static function execute(String $sql, array $params = []): Oci8Statement
     {
     $statement = self::getInstance()->parse($sql);
@@ -83,6 +89,12 @@ class oradb extends AbstractDatabase
     return $statement->execute() ? $statement : null; //FiXME possible problems?
     }
   
+  /**
+   * @param String $sql
+   * @param array  $params
+   * @return array
+   * @throws \modules\Oci8\Oci8Exception
+   */
   public static function getAll(String $sql, array $params = []): array
     {
     $data = [];
