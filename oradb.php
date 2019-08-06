@@ -106,6 +106,12 @@ class oradb extends AbstractDatabase
     return $data;
     }
   
+  /**
+   * @param String $sql
+   * @param array  $params
+   * @return array
+   * @throws \modules\Oci8\Oci8Exception
+   */
   public static function getOne(String $sql, array $params = [])
     {
     $data = [];
