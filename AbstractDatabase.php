@@ -23,10 +23,13 @@ abstract class AbstractDatabase
   
   abstract public static function getOne(String $sql, Array $params = []);
   
-  //abstract public static function commit();
+  abstract public static function commit();
   
   //abstract public static function rollback();
-  
+
+    // check in postgresql, implement in oracle to avoid OCI_NO_AUTO_COMMIT usage
+  //abstract public static function transactionStart();
+
   protected static function getInstance(String $dbType)
     {
     return self::$instances[$dbType][0] ?? null;

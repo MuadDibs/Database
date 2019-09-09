@@ -30,17 +30,17 @@ class oradb extends AbstractDatabase
     $dbInstance = new Oci8Connection($userName,
                                      $password,
                                      $connectionString);
-    
+
     self::addInstance(DBTypes::ORACLE, $dbInstance);
-    
+
     if ($applicationName)
       {
       self::setApplicationName($applicationName);
       }
-    
+
     return true;
     }
-  
+
   /**
    * @param String $sql
    * @return Oci8Statement
@@ -50,7 +50,7 @@ class oradb extends AbstractDatabase
     {
     return self::getInstance()->parse($sql);
     }
-  
+
   /**
    * @param       $statement
    * @param array $params
@@ -75,20 +75,20 @@ class oradb extends AbstractDatabase
       }
     return $statement;
     }
-  
+
   /**
    * @param String $sql
    * @param array  $params
    * @return Oci8Statement
    * @throws \modules\Oci8\Oci8Exception
    */
-  public static function execute(String $sql, array $params = []): Oci8Statement
+  public static function execute(String $sql, array $params = [], $mode = OCI_COMMIT_ON_SUCCESS): Oci8Statement
     {
     $statement = self::getInstance()->parse($sql);
     self::bind($statement, $params);
-    return $statement->execute() ? $statement : null; //FiXME possible problems?
+    return $statement->execute($mode) ? $statement : null; //FiXME possible problems?
     }
-  
+
   /**
    * @param String $sql
    * @param array  $params
@@ -98,14 +98,14 @@ class oradb extends AbstractDatabase
   public static function getAll(String $sql, array $params = []): array
     {
     $data = [];
-    
+
     $statement = self::execute($sql, $params);
     $rowsCount = $statement->fetchAll($data);
     $statement->free();
-    
+
     return $data;
     }
-  
+
   /**
    * @param String $sql
    * @param array  $params
@@ -118,17 +118,26 @@ class oradb extends AbstractDatabase
     $statement = self::execute($sql, $params);
     return $statement->fetchAssoc();
     }
-  
+
+    /**
+     * @return bool
+     * @throws \modules\Oci8\Oci8Exception
+     */
+    public static function commit() : bool
+    {
+    return self::getInstance()->commit();
+    }
+
   public static function getCursor()
     {
     // TODO: Implement getCursor() method
     }
-  
+
   protected static function getInstance(String $dbType = DBTypes::ORACLE): Oci8Connection
     {
     return parent::getInstance($dbType);
     }
-  
+
   protected static function setApplicationName(String $applicationName)
     {
     self::getInstance()->setClientInfo($applicationName);
