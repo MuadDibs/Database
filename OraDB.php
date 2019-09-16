@@ -9,12 +9,12 @@ use modules\Oci8\Oci8Statement;
 class oradb extends AbstractDatabase
   {
   /**
-   * @param String      $userName
-   * @param String      $password
-   * @param String      $SID
-   * @param String      $host
+   * @param String $userName
+   * @param String $password
+   * @param String $SID
+   * @param String $host
    * @param String|null $applicationName
-   * @param Int         $port
+   * @param Int $port
    * @return bool
    * @throws \modules\Oci8\Oci8Exception
    */
@@ -26,17 +26,15 @@ class oradb extends AbstractDatabase
                                  Int $port = 1521)
     {
     $connectionString = '//' . $host . ':' . $port . '/' . $SID;
+    //TODO add more params including encoding
     //TODO add try/catch around connection
-    $dbInstance = new Oci8Connection($userName,
-                                     $password,
-                                     $connectionString);
+    $dbInstance = new Oci8Connection($userName, $password, $connectionString);
 
     self::addInstance(DBTypes::ORACLE, $dbInstance);
 
-    if ($applicationName)
-      {
+    if ($applicationName) {
       self::setApplicationName($applicationName);
-      }
+    }
 
     return true;
     }
@@ -58,40 +56,35 @@ class oradb extends AbstractDatabase
    */
   protected static function bind($statement, array $params): Oci8Statement
     {
-    foreach ($params as $paramName => $paramValue)
-      {
-      if (is_a($paramValue, '\OCI-Collection'))
-        {
+    // move to statement bind
+    foreach ($params as $paramName => $paramValue) {
+      if (is_a($paramValue, '\OCI-Collection')) {
         $statement->bindByName($paramName, $paramValue, -1, SQLT_NTY);
-        }
-      elseif (!is_array($paramValue))
-        {
+      } elseif (!is_array($paramValue)) {
         $statement->bindByName($paramName, $paramValue);
-        }
-      else
-        {
+      } else {
         $statement->bindArrayByName($paramName, $paramValue, -1);
-        }
       }
+    }
     return $statement;
     }
 
   /**
    * @param String $sql
-   * @param array  $params
+   * @param array $params
    * @return Oci8Statement
    * @throws \modules\Oci8\Oci8Exception
    */
-  public static function execute(String $sql, array $params = [], $mode = OCI_COMMIT_ON_SUCCESS): Oci8Statement
+  public static function execute(String $sql, array $params = [], $mode = null): ?Oci8Statement
     {
     $statement = self::getInstance()->parse($sql);
     self::bind($statement, $params);
-    return $statement->execute($mode) ? $statement : null; //FiXME possible problems?
+    return $statement->execute($mode) ? $statement : null;
     }
 
   /**
    * @param String $sql
-   * @param array  $params
+   * @param array $params
    * @return array
    * @throws \modules\Oci8\Oci8Exception
    */
@@ -108,24 +101,38 @@ class oradb extends AbstractDatabase
 
   /**
    * @param String $sql
-   * @param array  $params
+   * @param array $params
    * @return array
    * @throws \modules\Oci8\Oci8Exception
    */
   public static function getOne(String $sql, array $params = [])
     {
-    $data = [];
     $statement = self::execute($sql, $params);
     return $statement->fetchAssoc();
     }
 
-    /**
-     * @return bool
-     * @throws \modules\Oci8\Oci8Exception
-     */
-    public static function commit() : bool
+
+  public static function transactionStart() : bool
+    {
+    return self::getInstance()->transactionStart();
+    }
+
+  /**
+   * @return bool
+   * @throws \modules\Oci8\Oci8Exception
+   */
+  public static function commit(): bool
     {
     return self::getInstance()->commit();
+    }
+
+  /**
+   * @return bool
+   * @throws \modules\Oci8\Oci8Exception
+   */
+  public static function rollback(): bool
+    {
+    return self::getInstance()->rollback();
     }
 
   public static function getCursor()
@@ -140,6 +147,7 @@ class oradb extends AbstractDatabase
 
   protected static function setApplicationName(String $applicationName)
     {
+    //TODO switch to module name?
     self::getInstance()->setClientInfo($applicationName);
     }
   //TODO add getNewCollection method
