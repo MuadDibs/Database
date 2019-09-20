@@ -6,7 +6,7 @@ use modules\Oci8\Oci8Connection;
 use modules\Oci8\Oci8Statement;
 
 
-class oradb extends AbstractDatabase
+class OraDB extends AbstractDatabase
   {
   /**
    * @param String $userName
